@@ -1,0 +1,26 @@
+configuration:
+  excel_path:
+    'LLM survey.xlsx'
+  year_ranges:
+    # default ranges for each query. If a year is left out of the ranges, it will be omitted from the model.
+    # define each year range as a list of two integers, the first being the start year and the second being the end year
+    model_size:
+      - [2017, 2019]
+      - [2020, 2021]
+      - [2022, 2022]
+      - [2023, 2024]
+    parallel_strategy:
+      - [2017, 2019]
+      - [2020, 2022]
+      - [2022, 2024]
+    numerical_format:
+      - [2018, 2021]
+      - [2022, 2023]
+      - [2024, 2024]
+  optimizers: # n extra parameters added to the model by the optimizer
+    'sgd':
+      0
+    'rmsprop':
+      1
+    'adam':
+      2
