@@ -23,3 +23,7 @@ Setup:
 To setup, run 
 pip install . 
 in the sustainable_computing_workload directory
+
+Run:
+
+To run the first example, run python -m examples.single_query
