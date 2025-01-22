@@ -1,3 +1,5 @@
+# example of leaving out some of the fields, and querying only the year
+
 query:
   year:
     2019

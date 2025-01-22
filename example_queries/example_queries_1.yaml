@@ -1,3 +1,5 @@
+# you can query multiple queries at a time, make sure to use the Query.queries method
+
 queries:
   query_1:
     year:
