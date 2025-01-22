@@ -47,18 +47,21 @@ class HardwareComparison:
     #region Getters
     def get_year(self):
         return self.year
+    
+    def get_chip(self):
+        return self.chip
 
     def get_chip_type(self):
         return self.chip_type
     
     def get_tflops(self, numerical_format):
-        if numerical_format == '4':
+        if numerical_format == 4:
             return self.fp4_tflops if not math.isnan(self.fp4_tflops) else None
-        elif numerical_format == '8':
+        elif numerical_format == 8:
             return self.fp8_tflops if not math.isnan(self.fp8_tflops) else None
-        elif numerical_format == '16':
+        elif numerical_format == 16:
             return self.fp16_bf16_tflops if not math.isnan(self.fp16_bf16_tflops) else None
-        elif numerical_format == '32':
+        elif numerical_format == 32:
             return self.fp32_tflops if not math.isnan(self.fp32_tflops) else None
     #endregion
 

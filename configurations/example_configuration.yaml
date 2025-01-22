@@ -24,3 +24,9 @@ configuration:
       1
     'adam':
       3
+  baseline_model:
+    model: 'bert'
+    parameters: 0.34 # (B)
+    tflops: 123 #(TFLOPS)
+    training_runtime: 1302.4 #(GPU-Hours)
+    inference_runtime: 4.2 #(ms)

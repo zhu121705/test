@@ -197,9 +197,9 @@ class ModelSize:
   
         parameters = self.params 
         if phase == 'inference':
-            return_dict = {'activation_size': max_inference_activations, 'weight_size': self.max_kv_cache + parameters, 'optimizer_size': 0}
+            return_dict = {'activation_size': max_inference_activations, 'weight_size': self.max_kv_cache + parameters, 'optimizer_size': 0, 'parameters': parameters}
         elif phase == 'training':
-            return_dict = {'activation_size': training_activations, 'weight_size': parameters * 2, 'optimizer_size': optimizer * parameters}
+            return_dict = {'activation_size': training_activations, 'weight_size': parameters * 2, 'optimizer_size': optimizer * parameters, 'parameters': parameters}
         return return_dict
 
 class ModelSizeList(SubQueryList):
@@ -252,15 +252,18 @@ class ModelSizeList(SubQueryList):
         model_size_dict = {
             'activation_size': 0,
             'weight_size': 0,
-            'optimizer_size': 0
+            'optimizer_size': 0,
+            'parameters': 0
         }
 
         for ms in model_size_list:
             model_size_dict['activation_size'] += ms['activation_size']
             model_size_dict['weight_size'] += ms['weight_size']
             model_size_dict['optimizer_size'] += ms['optimizer_size']
+            model_size_dict['parameters'] += ms['parameters']
 
         model_size_dict['activation_size'] /= len(model_size_list)
         model_size_dict['weight_size'] /= len(model_size_list)
         model_size_dict['optimizer_size'] /= len(model_size_list)
+        model_size_dict['parameters'] /= len(model_size_list)
         return model_size_dict

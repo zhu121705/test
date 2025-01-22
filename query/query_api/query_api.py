@@ -16,10 +16,11 @@ class Query:
             if verbose: print('Loading query object from checkpoint path ' + path)
             self.load_pkl(path)
 
-    def load_excel(self, excel_path: str, year_ranges: OrderedDict, optimizers: OrderedDict = None):
+    def load_excel(self, excel_path: str, year_ranges: OrderedDict, optimizers: OrderedDict = None, baseline_model: OrderedDict = None):
         self.input_dict = clean_dictionary_keys(read_excel(excel_path))
         self.year_ranges_dict = year_ranges
         self.optimizer_dict = optimizers
+        self.baseline_model = baseline_model
         self.model_size_list = model_size.ModelSizeList(self.input_dict['model_size'], self.year_ranges_dict['model_size'], optimizer_dict=self.optimizer_dict)
         self.numerical_format_list = numerical_format.NumericalFormatList(self.input_dict['numerical_format'], self.year_ranges_dict['numerical_format'])
         self.parallel_strategy_list = parallel_strategy.ParallelStrategyList(self.input_dict['parallel_strategy'], self.year_ranges_dict['parallel_strategy'])
@@ -59,18 +60,28 @@ class Query:
         parallel_strategy = query_params_dict.get('parallel_strategy')
         optimizer = query_params_dict.get('optimizer')
         chip_type = query_params_dict.get('chip_type')
-            
+
         model_size_query = self.model_size_list.query(year, phase, optimizer)
         numerical_format_query = self.numerical_format_list.query(year, numerical_format)
         parallel_strategy_query = self.parallel_strategy_list.query(year, parallel_strategy, phase)
-
         hardware_comparison_query = self.hardware_comparison_list.query(year, chip_type, numerical_format_query['activation_numerical_format'])
+
+        if phase == 'inference': baseline_runtime = self.baseline_model['inference_runtime']
+        elif phase == 'training': baseline_runtime = self.baseline_model['training_runtime']
+
+        try:
+            runtime = baseline_runtime * (model_size_query['parameters'] / self.baseline_model['parameters']) * (self.baseline_model['tflops'] / hardware_comparison_query) * (1 / numerical_format_query['speedup']) * (1 / parallel_strategy_query)
+        except:
+            None
+
+        if not (isinstance(runtime, float) or isinstance(runtime, int)):
+            runtime = None
 
         model_size_query['activation_size'] *= numerical_format_query['activation_numerical_format'] * (10**12 / 2**40)
         model_size_query['weight_size'] *= numerical_format_query['weight_numerical_format'] * (10**9 / 2**40) if phase == 'inference' else numerical_format_query['activation_numerical_format'] * (10**9 / 2**30)
         model_size_query['optimizer_size'] = model_size_query['optimizer_size'] * 32 * (10**9 / 2**40)
 
-        runtime = 1302.4 # bert runtime as placeholder
+        #runtime = (models_params/baseline_params) * (baseline_tflops/chip_tflops) * (1/numerical_format_speedup) * (1/parallel_strategy_speedup) * baseline_runtime
 
         output_dict = OrderedDict({
             'average model size (TB)': model_size_query['activation_size'] + model_size_query['weight_size'],

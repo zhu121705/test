@@ -4,7 +4,7 @@ query:
   year:
     2019
   numerical_format:
-    '32-16' # Not needed, numerical format speedups are grouped by year and this can be omitted
+    '16-8' # Not needed, numerical format speedups are grouped by year and this can be omitted
   phase:
     'training' # defaults to training where phase is necessary, but will make a difference if specified
   parallel_strategy:
