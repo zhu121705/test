@@ -27,3 +27,7 @@ in the sustainable_computing_workload directory
 Run:
 
 To run the first example, run python -m examples.single_query
+
+Testing:
+
+To automate building a query, you can look at the build_test.py in the examples directory. This gives an example of how to build many queries at once and save them to a yaml file. Each key must be an accepted key by the api. The values for each key is a list of the parameters you want to pass.
