@@ -1,6 +1,6 @@
 import os, yaml, sys, re, datetime, pickle
 import pandas as pd
-
+from itertools import product
 from collections import OrderedDict
 from yamlordereddictloader import SafeDumper
 from yamlordereddictloader import SafeLoader
@@ -158,3 +158,28 @@ def write_pkl(content :object, file: str):
 def read_pkl(file: str) -> object:
     in_file = open(file, 'rb')
     return pickle.load(in_file)
+
+def build_test(test_dict: OrderedDict, path: str = 'example_queries/test.yaml'):
+    key_options = ['year', 'phase', 'numerical_format', 'parallel_strategy', 'optimizer', 'chip_type']
+
+    # Validate keys
+    for key in test_dict:
+        if key not in key_options:
+            raise ValueError(f'Invalid key: {key} utils.build_test()')
+
+    # Generate all combinations
+    keys = test_dict.keys()
+    values = test_dict.values()
+    combinations = list(product(*values))
+
+    # Create queries dictionary
+    queries = OrderedDict({'queries': OrderedDict()})
+    for i, combination in enumerate(combinations):
+        query_dict = OrderedDict()
+        for key, value in zip(keys, combination):
+            query_dict[key] = value
+        queries['queries'][f'query_{i+1}'] = query_dict
+
+    # Write to yaml file
+    write_yaml(path, queries)
+
