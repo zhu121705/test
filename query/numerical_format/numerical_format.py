@@ -53,7 +53,7 @@ class NumericalFormatList(SubQueryList):
     - input_dict: dictionary of numerical format inumerical_formatormation
     - year_ranges: list of tuples containing the start and end years of the year ranges
     """
-    def __init__(self, input_dict: dict, year_ranges: list[tuple]):
+    def __init__(self, input_dict: dict, year_ranges: list[tuple], function: str = 'mean'):
         self.numerical_format_list = []
         self.year_ranges = [tuple(year_range) for year_range in year_ranges]
         self.numerical_format_set = set()
@@ -91,7 +91,7 @@ class NumericalFormatList(SubQueryList):
             prev_speedup = 1
             for grouping in sub_dict.values():
                 speedup_list = [obj.get_speedup() for obj in grouping['speedup_list']]
-                grouping['average_speedup'] = self.average(speedup_list) * prev_speedup
+                grouping['average_speedup'] = self.average(speedup_list, function) * prev_speedup
                 prev_speedup = grouping['average_speedup']
 
     def _add_to_year_grouping(self, sub_dict: dict):
@@ -112,7 +112,7 @@ class NumericalFormatList(SubQueryList):
                 activation_format = obj.activation_format
         return activation_format, weight_format
 
-    def query(self, query_year: int = None, numerical_format: str = None, phase: str = 'inference'):
+    def query(self, query_year: int = None, numerical_format: str = None, phase: str = 'inference', funtion: str = 'mean'):
         """Query the numerical format data
         
         Args:

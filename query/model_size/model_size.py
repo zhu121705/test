@@ -1,6 +1,7 @@
 from query.query_interface import SubQueryList
 from collections import OrderedDict
 import math
+import statistics
 
 class ModelSize:
     """
@@ -155,7 +156,7 @@ class ModelSizeList(SubQueryList):
     # - query_optimizer: optimizer to query
     # Outputs:
     # - list of dictionaries containing the average model size (Billions) 
-    def query(self, query_year: int = None, query_phase: str = 'inference', query_optimizer: str = 'adam'):
+    def query(self, query_year: int = None, query_phase: str = 'inference', query_optimizer: str = 'adam', function = 'mean'):
 
         if query_optimizer == None:
             query_optimizer = 'adam'
@@ -173,14 +174,14 @@ class ModelSizeList(SubQueryList):
         if not model_size_list:
             return None
         
-        return self.average(model_size_list)
+        return self.average(model_size_list, function)
     
     # Calculates the average of a list of model sizes
     # Inputs:
     # - model_size_list: list of model sizes dictionaries
     # Outputs:
     # - single dictionionary containing the average model size
-    def average(self, model_size_list: list[float]):
+    def average(self, model_size_list: list[float], function: str):
         model_size_dict = OrderedDict({
             'activation_size': 0,
             'weight_size': 0,
@@ -189,16 +190,44 @@ class ModelSizeList(SubQueryList):
             'seq_length': 0,
         })
 
-        for ms in model_size_list:
-            model_size_dict['activation_size'] += ms['activation_size']
-            model_size_dict['weight_size'] += ms['weight_size']
-            model_size_dict['optimizer_size'] += ms['optimizer_size']
-            model_size_dict['parameters'] += ms['parameters']
-            model_size_dict['seq_length'] += ms['seq_length']
+        if function == 'mean':
+            for ms in model_size_list:
+                model_size_dict['activation_size'] += ms['activation_size']
+                model_size_dict['weight_size'] += ms['weight_size']
+                model_size_dict['optimizer_size'] += ms['optimizer_size']
+                model_size_dict['parameters'] += ms['parameters']
+                model_size_dict['seq_length'] += ms['seq_length']
 
-        model_size_dict['activation_size'] /= len(model_size_list)
-        model_size_dict['weight_size'] /= len(model_size_list)
-        model_size_dict['optimizer_size'] /= len(model_size_list)
-        model_size_dict['parameters'] /= len(model_size_list)
-        model_size_dict['seq_length'] /= len(model_size_list)
+            model_size_dict['activation_size'] /= len(model_size_list)
+            model_size_dict['weight_size'] /= len(model_size_list)
+            model_size_dict['optimizer_size'] /= len(model_size_list)
+            model_size_dict['parameters'] /= len(model_size_list)
+            model_size_dict['seq_length'] /= len(model_size_list)
+
+        elif function == 'median':
+            activation_size_list = [ms['activation_size'] for ms in model_size_list]
+            weight_size_list = [ms['weight_size'] for ms in model_size_list]
+            optimizer_size_list = [ms['optimizer_size'] for ms in model_size_list]
+            parameters_list = [ms['parameters'] for ms in model_size_list]
+            seq_length_list = [ms['seq_length'] for ms in model_size_list]
+
+            model_size_dict['activation_size'] = statistics.median(activation_size_list)
+            model_size_dict['weight_size'] = statistics.median(weight_size_list)
+            model_size_dict['optimizer_size'] = statistics.median(optimizer_size_list)
+            model_size_dict['parameters'] = statistics.median(parameters_list)
+            model_size_dict['seq_length'] = statistics.median(seq_length_list)
+
+        elif function == 'geomean':
+            activation_size_list = [ms['activation_size'] for ms in model_size_list]
+            weight_size_list = [ms['weight_size'] for ms in model_size_list]
+            optimizer_size_list = [ms['optimizer_size'] for ms in model_size_list]
+            parameters_list = [ms['parameters'] for ms in model_size_list]
+            seq_length_list = [ms['seq_length'] for ms in model_size_list]
+
+            model_size_dict['activation_size'] = statistics.geometric_mean(activation_size_list)
+            model_size_dict['weight_size'] = statistics.geometric_mean(weight_size_list)
+            model_size_dict['optimizer_size'] = statistics.geometric_mean(optimizer_size_list)
+            model_size_dict['parameters'] = statistics.geometric_mean(parameters_list)
+            model_size_dict['seq_length'] = statistics.geometric_mean(seq_length_list)
+
         return model_size_dict

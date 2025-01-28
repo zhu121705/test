@@ -94,7 +94,7 @@ class HardwareComparisonList(SubQueryList):
     # - query_numerical_format: numerical format to query
     # Outputs:
     # - average tflops
-    def query(self, query_year: int, query_chip_type: str  = 'gpu', query_numerical_format = None):
+    def query(self, query_year: int, query_chip_type: str  = 'gpu', query_numerical_format = None, function = 'mean'):
         tflops_list = []
         hardware_year = 0
         
@@ -116,4 +116,4 @@ class HardwareComparisonList(SubQueryList):
                 if not isinstance(tflops, type(None)):
                     tflops_list.append(tflops)
 
-        return self.average(tflops_list) if tflops_list else None 
+        return self.average(tflops_list, function) if tflops_list else None 

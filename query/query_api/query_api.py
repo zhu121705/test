@@ -7,10 +7,11 @@ from query.utils.utils import read_csv_dir, read_yaml, write_yaml, write_txt, wr
 from collections import OrderedDict
 
 class Query: 
-    def __init__(self, path: str, verbose: bool = False):
+    def __init__(self, path: str, verbose: bool = False, function = 'mean'):
         self.path = path
+        self.function = function
         if self.path.endswith('.yaml'):
-            if verbose: print('Loading query object from excel file path ' + path)
+            if verbose: print('Loading query object from csv file path ' + path)
             self.load_excel(**read_yaml(path)['configuration'])
         else:
             if verbose: print('Loading query object from checkpoint path ' + path)
@@ -22,8 +23,8 @@ class Query:
         self.optimizer_dict = optimizers
         self.baseline_model = baseline_model
         self.model_size_list = model_size.ModelSizeList(self.input_dict['model_size'], self.year_ranges_dict['model_size'], optimizer_dict=self.optimizer_dict)
-        self.numerical_format_list = numerical_format.NumericalFormatList(self.input_dict['numerical_format'], self.year_ranges_dict['numerical_format'])
-        self.parallel_strategy_list = parallel_strategy.ParallelStrategyList(self.input_dict['parallel_strategy'], self.year_ranges_dict['parallel_strategy'])
+        self.numerical_format_list = numerical_format.NumericalFormatList(self.input_dict['numerical_format'], self.year_ranges_dict['numerical_format'], self.function)
+        self.parallel_strategy_list = parallel_strategy.ParallelStrategyList(self.input_dict['parallel_strategy'], self.year_ranges_dict['parallel_strategy'], self.function)
         self.hardware_comparison_list = hardware_comparison.HardwareComparisonList(self.input_dict['hardware_comparison'])
         self.log_file = create_log()
 
@@ -60,10 +61,10 @@ class Query:
         optimizer = query_params_dict.get('optimizer')
         chip_type = query_params_dict.get('chip_type')
 
-        model_size_query = self.model_size_list.query(year, phase, optimizer)
+        model_size_query = self.model_size_list.query(year, phase, optimizer, self.function)
         numerical_format_query = self.numerical_format_list.query(year, numerical_format, phase)
         parallel_strategy_query = self.parallel_strategy_list.query(year, parallel_strategy, phase)
-        hardware_comparison_query = self.hardware_comparison_list.query(year, chip_type, numerical_format_query['activation_numerical_format'])
+        hardware_comparison_query = self.hardware_comparison_list.query(year, chip_type, numerical_format_query['activation_numerical_format'], self.function)
 
         if phase == 'inference': 
             baseline_runtime = (self.baseline_model['inference_runtime'] / (1000 * 60 * 60)) * (model_size_query['seq_length'] / self.baseline_model['sequence_length'])
@@ -104,7 +105,7 @@ class Query:
 
         return output_dict
     
-    def queries(self, query_path: str = None, queries_dict: OrderedDict = None, log: bool = False) -> list[OrderedDict]:
+    def queries(self, query_path: str = None, queries_dict: OrderedDict = None, log: bool = False, function = 'mean') -> list[OrderedDict]:
         if query_path:
             query_dict = read_yaml(query_path)
         elif queries_dict:

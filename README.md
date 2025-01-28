@@ -2,7 +2,7 @@ This API is used to return a approximated runtime given specified model paramete
 To create your own query, you can follow the examples in example queries.
 
 The configuration for a query.yaml file to pass to the API follows as
-The data is initially pulled from LLM survey.xlsx, but can also be loaded from checkpoints
+The data is initially pulled from LLM survey.xlsx, but can also be loaded from checkpoints.
 
 query:
     year: int (can handle any value, as it has bounds given input data from the excel file)
@@ -24,9 +24,25 @@ To setup, run
 pip install . 
 in the sustainable_computing_workload directory
 
+Init:
+query_obj = Query(path, verbose, function)
+- path is either configuration or checkpoint path
+- verbose being set to true will print logs to terminal, default false
+- funtion can change the interal average funtion, default mean, options: mean, median, geomean
+
 Run:
 
 To run the first example, run python -m examples.single_query in the sustainable_computing_workload directory
+
+query = query(query_path, query_dict, log)
+- query_path is the path to the query yaml, default None
+- query_dict can be used instead of yaml path to pass a dict directly, but is not recommended, default None
+- log being set to true will print logs in the run directory, default false
+
+queries = queries(query_path, query_dict, log)
+- query_path is the path to the queries yaml, default None
+- query_dict can be used instead of yaml path to pass a dict directly, but is not recommended, default None
+- log being set to true will print logs in the run directory, default false
 
 Testing:
 

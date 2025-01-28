@@ -22,8 +22,13 @@ class SubQueryList(ABC):
             previous_range = year_range
         return None
 
-    def average(self, speedup_list: list[float]) -> float:
-        return round(sum(speedup_list) / len(speedup_list), 6) if speedup_list else None
+    def average(self, speedup_list: list[float], function) -> float:
+        if function == 'mean':
+            return round(sum(speedup_list) / len(speedup_list), 6) if speedup_list else None
+        elif function == 'median':
+            return round(statistics.median(speedup_list), 6) if speedup_list else None
+        elif function == 'geomean':
+            return round(statistics.geometric_mean(speedup_list), 6) if speedup_list else None
 
     def select_year_index(self, query_year: int, year_ranges: list[list]) -> list[int]:
         if query_year < year_ranges[0][0]:
