@@ -14,7 +14,7 @@ query:
 
 The configuration file, which can be found at 'configurations/example_configuration.yaml', is advised to not be changed. The year ranges can be changed, but nothing can be removed. The optimizers can be changed, but this would result in having to adjust internal code to change defaults and other interactions. Given this, it is advised not to change the defualt configuration. 
 If the excel file path is changed, then changing this to max the correct filepath will not have any adverse effect to the api, and is recommended.
-If you never change the configuration file path, you should be able to continue to use the same checkpoint file.
+If you never change the configuration file path, you should be able to continue to use the same checkpoint file. A checkpoint file is not needed, as the csv files are small enough to not add any latency in initialization, but making the checkpoint allows you to save the .log file, and reuse that .log file.
 
 The model returns a dictionary containing the output model size (TB), numerical format speedup, parallel strategy speedup, throughput (TFLOPS), and runtime (GPUH). It records the inputs and outputs to a log file if this is enabled.
 

@@ -141,22 +141,19 @@ class ParallelStrategyList(SubQueryList):
                         'average_speedup': None
                     })
                 })
-            else:
-                self.parallel_strategy_dict[item_parallel_strategy]['year_range'] = [
-                    min(item_year, self.parallel_strategy_dict[item_parallel_strategy]['year_range'][0]),
-                    max(item_year, self.parallel_strategy_dict[item_parallel_strategy]['year_range'][1])
-                ]
-                self.parallel_strategy_dict[item_parallel_strategy]['speedup']['parallel_structure_objects'].append(parallel_strategy_obj)
-                self.parallel_strategy_dict[item_parallel_strategy][f'{item_phase}_speedup']['parallel_structure_objects'].append(parallel_strategy_obj)
-
+            self.parallel_strategy_dict[item_parallel_strategy]['year_range'] = [
+                min(item_year, self.parallel_strategy_dict[item_parallel_strategy]['year_range'][0]),
+                max(item_year, self.parallel_strategy_dict[item_parallel_strategy]['year_range'][1])
+            ]
+            self.parallel_strategy_dict[item_parallel_strategy]['speedup']['parallel_structure_objects'].append(parallel_strategy_obj)
+            self.parallel_strategy_dict[item_parallel_strategy][f'{item_phase}_speedup']['parallel_structure_objects'].append(parallel_strategy_obj)
+            
             year_range = self.get_year_range_tuple(item_year)
             year_range = (year_range[0], year_range[1])
             if year_range not in self.parallel_strategy_year_dict['year_ranges']:
                 self.parallel_strategy_year_dict['year_ranges'][year_range] = [parallel_strategy_obj]
             else:
                 self.parallel_strategy_year_dict['year_ranges'][year_range].append(parallel_strategy_obj)
-                
-        
 
     def compute_speedups(self):
         """
@@ -175,6 +172,7 @@ class ParallelStrategyList(SubQueryList):
 
         # Process parallel_strategy_year_dict
         compounding_speedup = 1
+        
         for year_range, objects in self.parallel_strategy_year_dict['year_ranges'].items():
             speedup_list = [obj.get_speedup() for obj in objects]
             avg_speedup = self.average(speedup_list) * compounding_speedup
@@ -183,7 +181,6 @@ class ParallelStrategyList(SubQueryList):
                 'parallel_structure_objects': objects,
                 'average_speedup': avg_speedup
             }
-
         # Apply compounding speedups to parallel_strategy_dict
         compounding_speedup = 1
         for parallel_strategy_dict in self.parallel_strategy_dict.values():

@@ -10,7 +10,7 @@ query_path = query_dir + query_file
 
 queries = Query(config_path, verbose = True)
 
-output_dict = queries.queries(query_path, log = True)
+output_dict = queries.queries(query_path=query_path, log = True)
 
 print(output_dict)
 

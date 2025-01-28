@@ -12,7 +12,7 @@ configuration:
     parallel_strategy:
       - [2017, 2019]
       - [2020, 2022]
-      - [2022, 2024]
+      - [2023, 2024]
     numerical_format:
       - [2018, 2021]
       - [2022, 2023]

@@ -3,7 +3,6 @@ Year,Work,Company,Parallel strategy,Phase,Speedup (X),,,,paper
 2018,PipeDream,Microsoft,Pipeline,Training,5,,,,PipeDream: Fast and Efficient Pipeline Parallel DNN Training
 2019,ZeRO,Microsoft,Pipeline,Training,10,,,,ZeRO: Memory Optimizations Toward Training Trillion Parameter Models
 2020,Megatron-LM,NVIDIA,Tensor,Training,2.98,,,,Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism
-2021,Varuna,Microsoft,Pipeline,Training,18,Interleaved Pipeline,,,"Varuna: Scalable, Low-cost Training of Massive Deep Learning Models"
 2021,SageMaker,Amazon,Tensor,Training,2.499094666,Interleaved Pipeline,,,Amazon SageMaker Model Parallelism: A General and Flexible Framework for Large Model Training
 2022,DeepSpeed,Microsoft,Pipeline/Tensor,Inference,7.3,Interleaved Pipeline,,,DeepSpeed Inference: Enabling Efficient Inference of Transformer Models at Unprecedented Scale
 2023,FSDP,Meta,Data,Training,5,,,,PyTorch FSDP: Experiences on Scaling Fully Sharded Data Parallel

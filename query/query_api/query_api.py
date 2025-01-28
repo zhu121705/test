@@ -40,7 +40,6 @@ class Query:
         self.path = path
 
     def query(self, query_path: str = None, query_dict: OrderedDict = None, log: bool = False) -> OrderedDict:
-
         if query_path is None and query_dict is None:
             raise ValueError('Either query_path or query_dict is required')
         elif query_dict is None:
@@ -105,13 +104,17 @@ class Query:
 
         return output_dict
     
-    def queries(self, path: str, log: bool = False) -> list[OrderedDict]:
-        query_dict = read_yaml(path)
-        query_results = []
+    def queries(self, query_path: str = None, queries_dict: OrderedDict = None, log: bool = False) -> list[OrderedDict]:
+        if query_path:
+            query_dict = read_yaml(query_path)
+        elif queries_dict:
+            query_dict = queries_dict
+
         if query_dict.get('query') is not None:
             raise ValueError('Invalid query.yaml configuration. Did you mean to call self.query() instead?')
-        for value in query_dict['queries'].values():
+        return_dict = OrderedDict({'queries': OrderedDict()})
+        for key, value in query_dict['queries'].items():
             query_result = self.query(query_dict=value, log=log) if isinstance(value, dict) else self.query(query_path=value, log=log)
-            query_results.append(query_result)
-        return query_results
+            return_dict['queries'][key] = query_result
+        return return_dict
             

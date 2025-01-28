@@ -122,6 +122,9 @@ class NumericalFormatList(SubQueryList):
         Returns:
             OrderedDict with speedup and format information
         """
+
+        phase = 'inference' if phase == None else phase
+
         if numerical_format:
             activation_format, weight_format = map(int, numerical_format.split('-'))
             if phase == 'training':
