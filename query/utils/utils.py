@@ -102,7 +102,10 @@ def write_txt(path: str, params_dict, output_dict: OrderedDict):
         file.write('\n\t\t\t\t\t\t')
         for key, value in output_dict.items():
             if isinstance(value, float):
-                file.write(f'{key}: {value:.4f}\t\t')
+                if key == 'runtime (GPUH)':
+                    file.write(f'{key}: {value:.8f}\t\t')
+                else:
+                    file.write(f'{key}: {value:.6f}\t\t')
             else:
                 file.write(f'{key}: {value}\t\t')
         file.write('\n\n')
@@ -114,7 +117,7 @@ def write_list_txt(path: str, input_list: list[OrderedDict]):
             file.write(f'{current_time}\t\t')
             for key, value in dictionary.items():
                 if isinstance(value, float):
-                    file.write(f'{key}: {value:.4f}\t\t')
+                    file.write(f'{key}: {value:.6f}\t\t')
                 else:
                     file.write(f'{key}: {value}\t\t')
             file.write('\n')
@@ -183,3 +186,26 @@ def build_test(test_dict: OrderedDict, path: str = 'example_queries/test.yaml'):
     # Write to yaml file
     write_yaml(path, queries)
 
+def read_csv_dir(dir: str) -> OrderedDict:
+    files = os.listdir(dir)
+    file_list = [file for file in files if os.path.isfile(os.path.join(dir, file)) and file.endswith('.csv')]
+    
+    csv_dict = OrderedDict()
+
+    for file in file_list:
+        df = pd.read_csv(os.path.join(dir, file))
+        sub_dict = OrderedDict({})
+
+        for index, row in df.iterrows():
+            if row.isna().all():
+                break
+            if index not in sub_dict:
+                sub_dict[index] = OrderedDict()
+            for header in df.columns:
+                header_lower = header.lower()
+                if 'Unnamed' in header:
+                    continue
+                if header_lower not in sub_dict[index]:
+                    sub_dict[index][header_lower] = row[header].lower() if isinstance(row[header], str) else row[header]
+        csv_dict[file.strip('.csv')] = sub_dict
+    return csv_dict

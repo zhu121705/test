@@ -3,7 +3,7 @@ from query.model_size import model_size
 from query.numerical_format import numerical_format
 from query.parallel_strategy import parallel_strategy
 from query.utils.utils import clean_dictionary_keys, create_log, create_checkpoint
-from query.utils.utils import read_excel, read_yaml, write_yaml, write_txt, write_pkl, read_pkl
+from query.utils.utils import read_csv_dir, read_yaml, write_yaml, write_txt, write_pkl, read_pkl
 from collections import OrderedDict
 
 class Query: 
@@ -16,8 +16,8 @@ class Query:
             if verbose: print('Loading query object from checkpoint path ' + path)
             self.load_pkl(path)
 
-    def load_excel(self, excel_path: str, year_ranges: OrderedDict, optimizers: OrderedDict = None, baseline_model: OrderedDict = None):
-        self.input_dict = clean_dictionary_keys(read_excel(excel_path))
+    def load_excel(self, path: str, year_ranges: OrderedDict, optimizers: OrderedDict = None, baseline_model: OrderedDict = None):
+        self.input_dict = clean_dictionary_keys(read_csv_dir(path))
         self.year_ranges_dict = year_ranges
         self.optimizer_dict = optimizers
         self.baseline_model = baseline_model
@@ -40,7 +40,7 @@ class Query:
         self.path = path
 
     def query(self, query_path: str = None, query_dict: OrderedDict = None, log: bool = False) -> OrderedDict:
-        
+
         if query_path is None and query_dict is None:
             raise ValueError('Either query_path or query_dict is required')
         elif query_dict is None:
@@ -62,33 +62,42 @@ class Query:
         chip_type = query_params_dict.get('chip_type')
 
         model_size_query = self.model_size_list.query(year, phase, optimizer)
-        numerical_format_query = self.numerical_format_list.query(year, numerical_format)
+        numerical_format_query = self.numerical_format_list.query(year, numerical_format, phase)
         parallel_strategy_query = self.parallel_strategy_list.query(year, parallel_strategy, phase)
         hardware_comparison_query = self.hardware_comparison_list.query(year, chip_type, numerical_format_query['activation_numerical_format'])
 
-        if phase == 'inference': baseline_runtime = self.baseline_model['inference_runtime']
-        elif phase == 'training': baseline_runtime = self.baseline_model['training_runtime']
+        if phase == 'inference': 
+            baseline_runtime = (self.baseline_model['inference_runtime'] / (1000 * 60 * 60)) * (model_size_query['seq_length'] / self.baseline_model['sequence_length'])
+            baseline_tflops = self.baseline_model['inference_tflops']  
+        elif phase == 'training':
+            baseline_runtime = self.baseline_model['training_runtime']
+            baseline_tflops = self.baseline_model['training_tflops']
 
         try:
-            runtime = baseline_runtime * (model_size_query['parameters'] / self.baseline_model['parameters']) * (self.baseline_model['tflops'] / hardware_comparison_query) * (1 / numerical_format_query['speedup']) * (1 / parallel_strategy_query)
+            runtime = baseline_runtime * (model_size_query['parameters'] / self.baseline_model['parameters']) * (baseline_tflops / hardware_comparison_query) * (1 / numerical_format_query['speedup']) * (1 / parallel_strategy_query)
         except:
-            None
+            runtime = None
 
         if not (isinstance(runtime, float) or isinstance(runtime, int)):
             runtime = None
 
-        model_size_query['activation_size'] *= numerical_format_query['activation_numerical_format'] * (10**12 / 2**40)
-        model_size_query['weight_size'] *= numerical_format_query['weight_numerical_format'] * (10**9 / 2**40) if phase == 'inference' else numerical_format_query['activation_numerical_format'] * (10**9 / 2**30)
-        model_size_query['optimizer_size'] = model_size_query['optimizer_size'] * 32 * (10**9 / 2**40)
+        billion = 10**9 # Billion
+        terabyte = 2**43 # Terabyte
+        conversion = billion/terabyte 
+
+        model_size_query['activation_size'] *= numerical_format_query['activation_numerical_format'] * conversion
+        model_size_query['weight_size'] *= numerical_format_query['weight_numerical_format'] * conversion if phase == 'inference' else numerical_format_query['activation_numerical_format'] * conversion
+        model_size_query['optimizer_size'] = model_size_query['optimizer_size'] * 32 * conversion # assume optimizer is always in fp32
 
         #runtime = (models_params/baseline_params) * (baseline_tflops/chip_tflops) * (1/numerical_format_speedup) * (1/parallel_strategy_speedup) * baseline_runtime
 
         output_dict = OrderedDict({
-            'average model size (TB)': model_size_query['activation_size'] + model_size_query['weight_size'],
+            'average model size (TB)': model_size_query['activation_size'] + model_size_query['weight_size'] + model_size_query['optimizer_size'],
             'numerical format speedup': numerical_format_query['speedup'],
             'parallel strategy speedup': parallel_strategy_query,
             'hardware (TFLOPS)': hardware_comparison_query,
-            'runtime (GPUH)': runtime
+            'runtime (GPUH)': runtime,
+            'parameters': model_size_query['parameters'],
         })
 
         if log:

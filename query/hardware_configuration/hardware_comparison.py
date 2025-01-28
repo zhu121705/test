@@ -81,6 +81,11 @@ class HardwareComparisonList(SubQueryList):
             'acc': min([item.get_year() for item in self.hardware_comparison_list if item.get_chip_type() == 'acc']),
             'wse': min([item.get_year() for item in self.hardware_comparison_list if item.get_chip_type() == 'wse'])
         }
+        self.max_year = {
+            'gpu': max([item.get_year() for item in self.hardware_comparison_list if item.get_chip_type() == 'gpu']),
+            'acc': max([item.get_year() for item in self.hardware_comparison_list if item.get_chip_type() == 'acc']),
+            'wse': max([item.get_year() for item in self.hardware_comparison_list if item.get_chip_type() == 'wse'])
+        }
         
     # Queries the hardware comparison list for the average tflops
     # Inputs:
@@ -89,12 +94,17 @@ class HardwareComparisonList(SubQueryList):
     # - query_numerical_format: numerical format to query
     # Outputs:
     # - average tflops
-    def query(self, query_year: int, query_chip_type = None, query_numerical_format = None):
+    def query(self, query_year: int, query_chip_type: str  = 'gpu', query_numerical_format = None):
         tflops_list = []
         hardware_year = 0
+        
+        if query_chip_type == None:
+            query_chip_type = 'gpu'
 
-        if query_chip_type in self.min_year and query_year < self.min_year[query_chip_type]:
+        if query_chip_type in self.min_year and query_year <= self.min_year[query_chip_type]:
             hardware_year = self.min_year[query_chip_type]
+        elif query_chip_type in self.max_year and query_year >= self.max_year[query_chip_type]:
+            hardware_year = self.max_year[query_chip_type]
         else:
             for item in self.hardware_comparison_list:
                 if query_chip_type == item.get_chip_type() and item.get_year() <= query_year and hardware_year < item.get_year():

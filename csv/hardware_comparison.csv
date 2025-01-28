@@ -1,0 +1,14 @@
+Year,Chip,Vendor,Chip Type,Transistor count (B),Area (mm^2),Core count,Percent Yield,TDP (W),FP4 (TFLOPS),FP8 (TFLOPS),FP16/BF16 (TFLOPS),FP32 (TFLOPS),On-chip mem (MB),On-chip bandwidth (TB/s),Off-chip mem (GB),Off-chip bandwidth (TB/s),Link
+2020,TSP,Groq,ACC,26.8,725,,,300,,,205,,220,80,,,https://groq.com/wp-content/uploads/2023/05/GROQ-ROCKS-NEURAL-NETWORKS.pdf
+2020,A100,NVIDIA,GPU,54.2,826,6912,,400,,,312,19.5,40,,80,1.52,https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf
+2020,GC200,Graphcore,ACC,59.4,823,1472,,,,,250,,900,,,0.3125,https://www.graphcore.ai/products/ipu
+2021,WSE-1,Cerebras,WSE,1200,46225,400000,,,,,2713.6,,18432,,,,
+2022,H100,NVIDIA,GPU,80,826,16896,,700,,1978.9,989.4,67,50,,80,3.35,https://resources.nvidia.com/en-us-tensor-core
+2022,WSE-2,Cerebras,WSE,2600,46225,850000,100,,,,6400,,40960,,,,
+2023,MI300X,AMD,ACC,153,1017,19456,,750,,2672.64,1331.2,163.4,256,,192,5.3,https://www.amd.com/en/products/accelerators/instinct/mi300/mi300x.html
+2023,Cloud AI 100,Qualcomm,ACC,,,,,150,,,288,,576,,128,0.53515625,https://www.qualcomm.com/products/technology/processors/cloud-artificial-intelligence/cloud-ai-100
+2023,Corsair,d-Matrix,ACC,130,,2048,,,,,,,2048,,,,
+2023,Gaudi 2,Intel,ACC,,,,,600,,,432,,48,,96,2.45,https://www.anandtech.com/show/21342/intel-introduces-gaudi-3-accelerator-going-bigger-and-aiming-higher
+2023,SN40L,SambaNova,ACC,102,,1040,,,,,638,,520,,,2,https://arxiv.org/abs/2405.07518
+2024,n300s,Tenstorrent,ACC,,,,,300,,466,,,192,,24,0.5625,https://tenstorrent.com/hardware/wormhole
+2024,WSE-3,Cerebras,WSE,4000,46225,900000,100,23000,,,12800,,45056,,,,https://www.nextplatform.com/2024/03/14/cerebras-goes-hyperscale-with-third-gen-waferscale-supercomputers/

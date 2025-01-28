@@ -1,6 +1,6 @@
 configuration:
-  excel_path:
-    'LLM survey.xlsx'
+  path:
+    'csv/'
   year_ranges:
     # default ranges for each query. If a year is left out of the ranges, it will be omitted from the model.
     # define each year range as a list of two integers, the first being the start year and the second being the end year
@@ -26,7 +26,9 @@ configuration:
       3
   baseline_model:
     model: 'bert'
+    sequence_length: 512
     parameters: 0.34 # (B)
-    tflops: 123 #(TFLOPS)
+    training_tflops: 123 #(TFLOPS)
+    inference_tflops: 177.2 #(TFLOPS)
     training_runtime: 1302.4 #(GPU-Hours)
-    inference_runtime: 4.2 #(ms)
+    inference_runtime: 5.2 #(ms)

@@ -1,0 +1,24 @@
+Year,Model,Company,model arch,# Params (B),Seq length,# Layers,d_model,d_ff,n_head,n_kv_head,Max KV cache (B),Training FLOPS,paper
+2017,Transformer,Google,enc/dec,0.213,512,6,1024,4096,16,16,0,2.3E+19,Attention is all you need
+2018,GPT-1,OpenAI,dec,0.117,512,12,768,3072,12,12,0.009437184,,Improving Language Understanding by Generative Pre-Training
+2018,BERT-L,Google,enc,0.34,512,24,1024,3072,16,16,0,,BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
+2019,GPT-2,OpenAI,dec,1.5,1024,48,1600,6400,25,25,0.1572864,,Language Models are Unsupervised Multitask Learners
+2019,T5,Google,dec,11,512,24,1024,4096,128,128,0.025165824,3.3E+22,Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer
+2019,"Megatron-LM",NVIDIA,dec,8.3,1024,72,3072,12288,24,24,0.452984832,,Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism
+2020,T-NLG,MS,dec,17,1024,78,4256,17024,28,28,0.679870464,,A 17-billion-parameter language model by Microsoft
+2020,GPT-3,OpenAI,dec,175,2048,96,12288,49152,96,96,4.831838208,3.14E+23,Language Models are Few-Shot Learners
+2021,MT-NLG,MS/NVIDIA,dec,530,2048,105,20480,81920,128,128,8.8080384,,"Using DeepSpeed and Megatron to Train Megatron-Turing NLG 530B, A Large-Scale Generative Language Model"
+2021,Gopher,DeepMind,dec,280,2048,80,16384,65536,128,128,5.36870912,,"Scaling Language Models: Methods, Analysis & Insights from Training Gopher"
+2021,PanGu-?,huawei,dec,200,1024,64,16384,65536,128,128,2.147483648,,PanGu-?: Large-scale Autoregressive Pretrained Chinese Language Models with Auto-parallel Computation
+2021,Ernie 3.0 Titan,Baidu,dec,260,512,48,12288,49152,192,192,0.603979776,,ERNIE 3.0 Titan: Exploring Larger-scale Knowledge Enhanced Pre-training for Language Understanding and Generation
+2022,LaMDA,Google,dec,137,2048,64,8192,65536,128,128,2.147483648,,LaMDA: Language Models for Dialog Applications
+2022,Chinchilla,DeepMind,dec,70,2048,80,8192,32768,64,64,2.68435456,,Training Compute-Optimal Large Language Models
+2022,PaLM,Google,dec,540,2048,118,18432,73728,48,48,8.908701696,,PaLM: Scaling Language Modeling with Pathways
+2022,OPT,Meta,dec,175,2048,96,12288,49152,96,96,4.831838208,,OPT: Open Pre-trained Transformer Language Models
+2022,Galactica,Meta,dec,120,2048,96,10240,40960,80,80,4.02653184,,Galactica: A Large Language Model for Science
+2022,Minerva,Google,dec,540,2048,118,18432,73728,48,48,8.908701696,,Solving Quantitative Reasoning Problems with Language Models
+2022,BLOOM,HF,dec,176,2048,70,14336,57344,112,112,4.11041792,,BLOOM: A 176B-Parameter Open-Access Multilingual Language Model
+2023,Llama,Meta,dec,65,2048,80,8192,22016,64,64,2.68435456,,LLaMA: Open and Efficient Foundation Language Models
+2023,Llama 2,Meta,dec,70,4096,80,8192,28672,64,8,0.67108864,,Llama 2: Open Foundation and Fine-Tuned Chat Models
+2024,Nemotron-4,NVIDIA,dec,340,4096,96,18432,73728,96,8,1.207959552,,Nemotron-4 340B Technical Report
+2024,Llama 3,Meta,dec,405,8192,126,16384,53248,128,8,2.113929216,,The Llama 3 Herd of Models

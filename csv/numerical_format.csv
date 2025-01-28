@@ -1,0 +1,11 @@
+Year,Format,Numerical Format,Phase,Speedup (X),Paper
+2018,FP32->FP16,32-16,training,4,MIXED PRECISION TRAINING
+2018,FP32->FP16,32-16,training,1.61,Highly Scalable Deep Learning Training System with Mixed-Precision: Training ImageNet in Four Minutes
+2018,FP32->FP16,32-16,training,2.25,Mixed-Precision Training for NLP and Speech Recognition with OpenSeq2Seq
+2019,FP32->FP16,32-16,training,5.2,Leveraging the bfloat16 Artificial Intelligence Datatype For Higher-Precision Computations
+2022,FP16->INT8,16-8,inference,1.81,LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale
+2023,FP16->FP8,16-8,training,1.75,FP8-LM: Training FP8 Large Language Models
+2024,FP16->FP8,16-8,inference,1.5,The Llama 3 Herd of Models
+2024,FP16->FP6,16-8,inference,2.65,Quant-LLM: Accelerating the Serving of Large Language Models via FP6-Centric Algorithm-System Co-Design on Modern GPUs
+2024,FP16->INT4,16-4,inference,3,AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration
+2024,FP16->INT4,16-4,inference,1.7,KVQuant: Towards 10 Million Context Length LLM Inference with KV Cache Quantization

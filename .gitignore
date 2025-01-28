@@ -1,3 +1,6 @@
 checkpoints/
 runs/
 runtime_api.egg-info/
+example_queries/test.yaml
+testing/
+csv_test/

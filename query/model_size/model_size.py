@@ -1,4 +1,5 @@
 from query.query_interface import SubQueryList
+from collections import OrderedDict
 import math
 
 class ModelSize:
@@ -36,11 +37,13 @@ class ModelSize:
         self.training_flops = training_flops
         self.paper = paper
         self.inference_max_memory = self.get_model_max_size('inference')
-        self.training_max_memory = {}
+        self.training_max_memory = OrderedDict({})
         for optimizer, value in optimizers.items():
             self.training_max_memory[optimizer] = self.get_model_max_size('training', value)
 
     # region Getters
+    def get_model(self):
+        return self.model
 
     def get_year(self):
         return self.year
@@ -80,7 +83,7 @@ class ModelSize:
     # - optimizer: optimizer to query (Adam, RSMprop, SGD)
     # Outputs:
     # - dictionary containing the maximum memory size of the model for both activations and parameters (parameters include gradient and optimizer in training, and kvcache in inference)
-    def get_model_max_size(self, phase, optimizer = 1):
+    def get_model_max_size(self, phase: str = 'inference', optimizer: int = 0):
         #TODO: add in multiple optimizers options
         # memory approximation of llms based on input parameters
         # Assume batch size of 1
@@ -101,14 +104,14 @@ class ModelSize:
 
         # self attention mechanism
         q = self.n_head * seq_len * d_model_per_head
-        k = self.n_kv_head * self.seq_length * d_model_per_head
-        v = self.n_kv_head * self.seq_length * d_model_per_head
+        #k = self.n_kv_head * self.seq_length * d_model_per_head unneeded, stored in kcache
+        #v = self.n_kv_head * self.seq_length * d_model_per_head unneeded, stored in vcache
         qkt = self.n_head * seq_len * self.seq_length
         softmax = self.n_head * seq_len * self.seq_length
         attn_v = seq_len * self.d_model
         proj_a = seq_len * self.d_model
         attn_output = qkt + softmax + attn_v + proj_a
-        attn_layer = max(q + k + qkt, qkt + softmax, softmax + v + attn_v, attn_v + proj_a)
+        attn_layer = max(q + qkt, qkt + softmax, softmax + attn_v, attn_v + proj_a)
 
         # feed forward network
         ffn_input = seq_len * self.d_model
@@ -120,86 +123,15 @@ class ModelSize:
         ffn_output = ffn_norm + gate_proj + up_proj + ffn_actv + down_proj
         ffn_layer = max(ffn_input + + ffn_norm, ffn_norm + gate_proj + up_proj, gate_proj + ffn_actv, ffn_actv + down_proj)
         max_inference_activations = max(prj_layer, attn_layer, ffn_layer) / 10**9
-        training_activations = math.sqrt(prj_output + attn_output + ffn_output) * self.layers / 10**9
+        training_activations = math.sqrt((prj_output + attn_output + ffn_output) * self.layers) / 10**9
         #endregion
-        # elif phase == 'training':
-        #     activation = math.sqrt(self.layers * self.seq_length * self.d_model(16 + (2/)))
-        # region deprecated
-        # initial size of single layer activation and all layers
-        # if self.max_kv_cache == 0 or phase == 'training':
-        #     initial_activation = self.seq_length * self.d_model
-
-        #     # projection activations at full sequence length
-        #     q_prj = self.seq_length * self.d_model
-        #     k_prj = self.seq_length * self.d_model * self.n_kv_head / self.n_head
-        #     v_prj = self.seq_length * self.d_model * self.n_kv_head / self.n_head
-
-        #     prj = q_prj + k_prj + v_prj
-
-        #     # self attention mechanism activations at full sequence length
-        #     q = self.n_head * self.seq_length * d_model_per_head
-        #     k = self.n_kv_head * self.seq_length * d_model_per_head
-        #     v = self.n_kv_head * self.seq_length * d_model_per_head
-
-        #     qkv = q + k + v
-
-        #     qkt = self.n_head * self.seq_length * self.seq_length
-
-        #     qktv = qkt + v
-
-        #     softmax = self.n_head * self.seq_length * self.seq_length
-        #     attn_v = self.seq_length * self.d_model
-        #     proj_a = self.seq_length * self.d_model
-
-        #     # feed forward network activations at full sequence length
-        #     up_projection = self.seq_length * self.d_ff
-        #     gate_projection = self.seq_length * self.d_ff
-        #     ffn_activation_function = self.seq_length * self.d_ff
-        #     down_projection = self.seq_length * self.d_model
-
-        #     ffn_up_gate = up_projection + gate_projection
-
-        # else:
-        #     initial_activation = self.d_model
-
-        #     # projection activations at full sequence length
-        #     q_prj = self.d_model
-        #     k_prj = self.d_model * self.n_kv_head / self.n_head
-        #     v_prj = self.d_model * self.n_kv_head / self.n_head
-
-        #     prj = q_prj + k_prj + v_prj
-
-        #     # self attention mechanism activations at full sequence length
-        #     q = self.n_head * d_model_per_head
-        #     k = self.n_kv_head * self.seq_length * d_model_per_head
-        #     v = self.n_kv_head * self.seq_length * d_model_per_head
-
-        #     qkv = q + k + v
-
-        #     qkt = self.n_head * self.seq_length
-
-        #     qktv = qkt + v
-
-        #     softmax = self.n_head * self.seq_length
-        #     attn_v = self.d_model
-        #     proj_a = self.d_model
-
-        #     # feed forward network activations at full sequence length
-        #     up_projection = self.d_ff
-        #     gate_projection = self.d_ff
-        #     ffn_up_gate = up_projection + gate_projection
-        #     ffn_activation_function = self.d_ff
-        #     down_projection = self.d_model
-        #     #endregion
-        # endregion
-
-        # pull maximum memory values from activation steps
   
         parameters = self.params 
         if phase == 'inference':
-            return_dict = {'activation_size': max_inference_activations, 'weight_size': self.max_kv_cache + parameters, 'optimizer_size': 0, 'parameters': parameters}
+            return_dict = OrderedDict({'activation_size': max_inference_activations, 'weight_size': self.max_kv_cache + parameters, 'optimizer_size': 0, 'parameters': parameters, 'seq_length': self.seq_length})
         elif phase == 'training':
-            return_dict = {'activation_size': training_activations, 'weight_size': parameters * 2, 'optimizer_size': optimizer * parameters, 'parameters': parameters}
+            return_dict = OrderedDict({'activation_size': training_activations, 'weight_size': parameters * 2, 'optimizer_size': optimizer * parameters, 'parameters': parameters, 'seq_length': self.seq_length})
+        #if self.model == 'palm': print('year:', self.year, '\tmodel:', self.model, '\tphase:', phase, '\toptimizer:', optimizer, '\t', return_dict, prj_layer, attn_layer, ffn_layer, self.layers)
         return return_dict
 
 class ModelSizeList(SubQueryList):
@@ -249,21 +181,24 @@ class ModelSizeList(SubQueryList):
     # Outputs:
     # - single dictionionary containing the average model size
     def average(self, model_size_list: list[float]):
-        model_size_dict = {
+        model_size_dict = OrderedDict({
             'activation_size': 0,
             'weight_size': 0,
             'optimizer_size': 0,
-            'parameters': 0
-        }
+            'parameters': 0,
+            'seq_length': 0,
+        })
 
         for ms in model_size_list:
             model_size_dict['activation_size'] += ms['activation_size']
             model_size_dict['weight_size'] += ms['weight_size']
             model_size_dict['optimizer_size'] += ms['optimizer_size']
             model_size_dict['parameters'] += ms['parameters']
+            model_size_dict['seq_length'] += ms['seq_length']
 
         model_size_dict['activation_size'] /= len(model_size_list)
         model_size_dict['weight_size'] /= len(model_size_list)
         model_size_dict['optimizer_size'] /= len(model_size_list)
         model_size_dict['parameters'] /= len(model_size_list)
+        model_size_dict['seq_length'] /= len(model_size_list)
         return model_size_dict

@@ -56,6 +56,11 @@ class NumericalFormatList(SubQueryList):
     def __init__(self, input_dict: dict, year_ranges: list[tuple]):
         self.numerical_format_list = []
         self.year_ranges = [tuple(year_range) for year_range in year_ranges]
+        self.numerical_format_set = set()
+
+        for sub_dict in input_dict.values():
+            self.numerical_format_set.add(sub_dict['numerical_format'])
+
         self.numerical_format_dict = OrderedDict({
             'year_grouping': OrderedDict(),
             'format_grouping': OrderedDict(),
@@ -107,7 +112,7 @@ class NumericalFormatList(SubQueryList):
                 activation_format = obj.activation_format
         return activation_format, weight_format
 
-    def query(self, query_year: int = None, numerical_format: str = None):
+    def query(self, query_year: int = None, numerical_format: str = None, phase: str = 'inference'):
         """Query the numerical format data
         
         Args:
@@ -118,19 +123,41 @@ class NumericalFormatList(SubQueryList):
             OrderedDict with speedup and format information
         """
         if numerical_format:
-            format_data = self.numerical_format_dict['format_grouping'][numerical_format]
             activation_format, weight_format = map(int, numerical_format.split('-'))
-            return OrderedDict({
-                'speedup': format_data['average_speedup'],
-                'activation_numerical_format': activation_format,
-                'weight_numerical_format': weight_format
-            })
+            if phase == 'training':
+                for nf in self.numerical_format_set:
+                    if numerical_format.split('-')[0] == nf.split('-')[1]:
+                        speedup = self.numerical_format_dict['format_grouping'][nf]['average_speedup']
+                        break
+                    else:
+                        speedup = 1
+                return OrderedDict({
+                    'speedup': speedup,
+                    'activation_numerical_format': activation_format,
+                    'weight_numerical_format': weight_format
+                })
+            elif phase == 'inference':
+                return OrderedDict({
+                    'speedup': self.numerical_format_dict['format_grouping'][numerical_format]['average_speedup'],
+                    'activation_numerical_format': activation_format,
+                    'weight_numerical_format': weight_format
+                })
         elif query_year:
+            if phase == 'training':
+                for year_range in self.year_ranges:
+                    if query_year <= year_range[1]:
+                        speedup = 1
+                        break
+                    if query_year >= year_range[0]:
+                        speedup = self.numerical_format_dict['year_grouping'][year_range]['average_speedup']
+                        break
+
             year_range_tuple = self.get_year_range_tuple(query_year)
             if not year_range_tuple:
                 return None
             
-            speedup = self.numerical_format_dict['year_grouping'][year_range_tuple]['average_speedup']
+            if phase == 'inference':
+                speedup = self.numerical_format_dict['year_grouping'][year_range_tuple]['average_speedup']
             activation_format, weight_format = self._get_numerical_formats(year_range_tuple)
             
             return OrderedDict({

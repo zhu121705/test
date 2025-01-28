@@ -2,9 +2,9 @@
 # Options for fields are listed in the 'configurations/example_configuration.yaml' file
 query:
   year:
-    2019
+    2018
   numerical_format:
-    '16-8' # Not needed, numerical format speedups are grouped by year and this can be omitted
+    '16-4' # Not needed, numerical format speedups are grouped by year and this can be omitted
   phase:
     'training' # defaults to training where phase is necessary, but will make a difference if specified
   parallel_strategy:
