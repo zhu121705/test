@@ -26,7 +26,7 @@ in the sustainable_computing_workload directory
 
 Run:
 
-To run the first example, run python -m examples.single_query
+To run the first example, run python -m examples.single_query in the sustainable_computing_workload directory
 
 Testing:
 
