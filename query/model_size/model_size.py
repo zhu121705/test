@@ -5,22 +5,22 @@ import statistics
 
 class ModelSize:
     """
-    This class defines a single model size object, defines getters, and computes the maximum memory size of the model
-    Inputs:
-    - year: year of the model
-    - model: name of the model
-    - company: company that created the model
-    - model_arch: architecture of the model (encoder, decoder, both)
-    - params: number of parameters in the model (in billions)
-    - seq_length: sequence length of the model
-    - layers: number of layers in the model
-    - d_model: model dimension
-    - d_ff: feed forward dimension
-    - n_head: number of heads
-    - n_kv_head: number of key-value heads
-    - max_kv_cache: maximum key-value cache
-    - training_flops: training flops of the model
-    - paper: paper the model is from
+    Defines a model size object, defines getters, and computes the maximum memory size of the model
+    Args:
+        year: year of the model
+        model: name of the model
+        company: company that created the model
+        model_arch: architecture of the model (encoder, decoder, both)
+        params: number of parameters in the model (in billions)
+        seq_length: sequence length of the model
+        layers: number of layers in the model
+        d_model: model dimension
+        d_ff: feed forward dimension
+        n_head: number of heads
+        n_kv_head: number of key-value heads
+        max_kv_cache: maximum key-value cache
+        training_flops: training flops of the model
+        paper: paper the model is from
     """
     def __init__(self, year: int, model: str, company: str, model_arch: str, params: float, seq_length: int, layers: int, d_model: int, d_ff: int, n_head: int, n_kv_head: int, max_kv_cache: int, training_flops: float, paper: str, optimizers: dict):
         self.year = year
@@ -75,7 +75,6 @@ class ModelSize:
     
     def get_training_max_memory(self, optimizer: str):
         return self.training_max_memory[optimizer]
-    
     # endregion
     
     # Calculates the maximum memory size of the model loaded into memory given phase and optimizer
@@ -85,11 +84,14 @@ class ModelSize:
     # Outputs:
     # - dictionary containing the maximum memory size of the model for both activations and parameters (parameters include gradient and optimizer in training, and kvcache in inference)
     def get_model_max_size(self, phase: str = 'inference', optimizer: int = 0):
-        #TODO: add in multiple optimizers options
-        # memory approximation of llms based on input parameters
-        # Assume batch size of 1
-        # memory sizes of a given step in the model are after computation (ex. q_projection is the size of activations after applying the projection)
-
+        """
+        Calculates the maximum memory needed to load the model configuration into memory
+        Args:
+            phase: phase of the model ['inference', 'training']
+            optimizer: optimizer to query as a ratio of parameters ['adam', 'rmsprop', 'sgd'] ex: adam = 3 (3x parameters needed to load adam optimizer)
+        Returns:
+            dictionary containing the maximum memory size of the model for activation, parameters, and optimizer
+        """
         d_model_per_head = self.d_model / self.n_head
 
         #region ACTIVATIONS
@@ -105,8 +107,6 @@ class ModelSize:
 
         # self attention mechanism
         q = self.n_head * seq_len * d_model_per_head
-        #k = self.n_kv_head * self.seq_length * d_model_per_head unneeded, stored in kcache
-        #v = self.n_kv_head * self.seq_length * d_model_per_head unneeded, stored in vcache
         qkt = self.n_head * seq_len * self.seq_length
         softmax = self.n_head * seq_len * self.seq_length
         attn_v = seq_len * self.d_model
@@ -132,16 +132,15 @@ class ModelSize:
             return_dict = OrderedDict({'activation_size': max_inference_activations, 'weight_size': self.max_kv_cache + parameters, 'optimizer_size': 0, 'parameters': parameters, 'seq_length': self.seq_length})
         elif phase == 'training':
             return_dict = OrderedDict({'activation_size': training_activations, 'weight_size': parameters * 2, 'optimizer_size': optimizer * parameters, 'parameters': parameters, 'seq_length': self.seq_length})
-        #if self.model == 'palm': print('year:', self.year, '\tmodel:', self.model, '\tphase:', phase, '\toptimizer:', optimizer, '\t', return_dict, prj_layer, attn_layer, ffn_layer, self.layers)
         return return_dict
 
 class ModelSizeList(SubQueryList):
     """
-    Contains a list of ModelSize objects, as well as handles querying the list
-    Inputs: 
-    - input_dict: dictionary of model size information
-    - year_ranges: list of tuples containing the start and end years of the year ranges
-    - optimizer_dict: dictionary of optimizers and their respective memory multipliers
+    Constructs a list of model size objects as well as defines a query function
+    Args: 
+        input_dict: dictionary of model size information
+        year_ranges: list of tuples containing the start and end years of the year ranges
+        optimizer_dict: dictionary of optimizers and their respective memory multipliers
     """
     def __init__(self, input_dict: dict, year_ranges: list[tuple], optimizer_dict: dict):
         self.model_size_list = []
@@ -156,8 +155,17 @@ class ModelSizeList(SubQueryList):
     # - query_optimizer: optimizer to query
     # Outputs:
     # - list of dictionaries containing the average model size (Billions) 
-    def query(self, query_year: int = None, query_phase: str = 'inference', query_optimizer: str = 'adam', function = 'mean'):
-
+    def query(self, query_year: int = None, query_phase: str = 'inference', query_optimizer: str = 'adam', function = 'median'):
+        """
+        Queries the model size list for the average model size
+        Args:
+            query_year: year to query
+            query_phase: phase to query ['inference', 'training']
+            query_optimizer: optimizer to query ['adam', 'rmsprop', 'sgd']
+            function: function to apply to model size list ['mean', 'median', 'geomean']
+        Returns:
+            list of dictionaries containing the average model size (Billions)
+        """
         if query_optimizer == None:
             query_optimizer = 'adam'
 
@@ -174,13 +182,16 @@ class ModelSizeList(SubQueryList):
         if not model_size_list:
             return None
         
+        # model_size_dict = OrderedDict({
+        #     'activation_size': self.average([ms['activation_size'] for ms in model_size_list], function),
+        #     'weight_size': self.average([ms['weight_size'] for ms in model_size_list], function),
+        #     'optimizer_size': self.average([ms['optimizer_size'] for ms in model_size_list], function),
+        #     'parameters': self.average([ms['parameters'] for ms in model_size_list], function),
+        #     'seq_length': self.average([ms['seq_length'] for ms in model_size_list], function),
+        # })
+
         return self.average(model_size_list, function)
-    
-    # Calculates the average of a list of model sizes
-    # Inputs:
-    # - model_size_list: list of model sizes dictionaries
-    # Outputs:
-    # - single dictionionary containing the average model size
+
     def average(self, model_size_list: list[float], function: str):
         model_size_dict = OrderedDict({
             'activation_size': 0,

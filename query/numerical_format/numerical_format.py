@@ -3,14 +3,14 @@ from collections import OrderedDict
 
 class NumericalFormat:
     """
-    This class creates a numerical format object, as well as define getters
-    Inputs:
-    - year: input year
-    - format: floating point format
-    - numerical_format: bitwidths of floating point format
-    - phase: training or inumerical_formaterence
-    - speedup: speedup of the numerical format
-    - paper: paper reference
+    Initiliazes a numerical format object, and define getters
+    Args:
+        year: input year
+        format: floating point format
+        numerical_format: bitwidths of floating point format
+        phase: training or inumerical_formaterence
+        speedup: speedup of the numerical format
+        paper: paper reference
     """
     def __init__(self, year: int, format: str, numerical_format: str, phase: str, speedup: float, paper: str):
         self.year = year
@@ -39,6 +39,7 @@ class NumericalFormat:
         return self.speedup
     #endregion
 
+    # redefine __str__ and __repr__ methods for internal validation
     def __str__(self):
         return f'(Year: {self.year}, Format: {self.numerical_format})'
     
@@ -48,12 +49,13 @@ class NumericalFormat:
 
 class NumericalFormatList(SubQueryList):
     """
-    This class creates a list of numerical format objects, as well as define a method to query the list
-    Inputs:
-    - input_dict: dictionary of numerical format inumerical_formatormation
-    - year_ranges: list of tuples containing the start and end years of the year ranges
+    Initializes a numerical format list and defines a method to query the list
+    Args:
+        input_dict: dictionary of numerical format inumerical_formatormation
+        year_ranges: list of tuples containing the start and end years of the year ranges
+        function: function to calculate the average speedup
     """
-    def __init__(self, input_dict: dict, year_ranges: list[tuple], function: str = 'mean'):
+    def __init__(self, input_dict: dict, year_ranges: list[tuple], function: str = 'geomean'):
         self.numerical_format_list = []
         self.year_ranges = [tuple(year_range) for year_range in year_ranges]
         self.numerical_format_set = set()
@@ -95,7 +97,11 @@ class NumericalFormatList(SubQueryList):
                 prev_speedup = grouping['average_speedup']
 
     def _add_to_year_grouping(self, sub_dict: dict):
-        """Add item to appropriate year grouping"""
+        """
+        Add item to appropriate year grouping
+        Args:
+            sub_dict: dictionary containing numerical format parameters
+        """
         for year_range in self.year_ranges:
             if year_range[0] <= sub_dict['year'] <= year_range[1]:
                 self.numerical_format_dict['year_grouping'][year_range]['speedup_list'].append(
@@ -103,7 +109,13 @@ class NumericalFormatList(SubQueryList):
                 )
 
     def _get_numerical_formats(self, year_range_tuple):
-        """Helper method to get the minimum numerical formats for a year range"""
+        """
+        Get the activation and weight numerical formats for a given year range
+        Args:
+            year_range_tuple: tuple containing the start and end years of the year range
+        Returns:
+            Tuple containing the activation and weight numerical formats
+        """
         activation_format = 32  # initialize to highest possible value
         weight_format = 32
         for obj in self.numerical_format_dict['year_grouping'][year_range_tuple]['speedup_list']:
@@ -113,12 +125,13 @@ class NumericalFormatList(SubQueryList):
         return activation_format, weight_format
 
     def query(self, query_year: int = None, numerical_format: str = None, phase: str = 'inference', funtion: str = 'mean'):
-        """Query the numerical format data
-        
+        """
+        Queries the numerical format lists for the average numerical format speedup
         Args:
             query_year: Year to query for
             numerical_format: Specific format to query (e.g. '8-16')
-            
+            phase: phase to determine numerical format
+            function: function to calculate the average speedup
         Returns:
             OrderedDict with speedup and format information
         """

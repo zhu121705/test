@@ -3,15 +3,15 @@ from collections import OrderedDict
 
 class ParallelStrategy:
     """
-    This class creates a parallel strategy object, as well as define getters
-    \nInputs
-    - year: input year
-    - work: the work to attribute the parallel strategy to
-    - company: the company that implemented the parallel strategy
-    - parallel_strategy: the parallel strategy used
-    - phase: the phase of the parallel strategy (inference or training)
-    - speedup: the speedup of the parallel strategy
-    - paper: the paper reference
+    Initializes a parallel strategy object and define getters
+    Args:
+        year: input year
+        work: the work to attribute the parallel strategy to
+        company: the company that implemented the parallel strategy
+        parallel_strategy: the parallel strategy used
+        phase: the phase of the parallel strategy (inference or training)
+        speedup: the speedup of the parallel strategy
+        paper: the paper reference
     """
     def __init__(self, year: int, work: str, company: str, parallel_strategy: str, phase: str, speedup: float, paper: str):
         self.year = year
@@ -41,13 +41,14 @@ class ParallelStrategy:
 
 class ParallelStrategyList(SubQueryList):
     """
-    This class creates a list of parallel strategy objects, as well as define a method to query the list
-    The input data is reformated and removes keys. If using a custom dataset, #TODO: add helper function
-    \nInputs
-    - input_dict: dictionary of parallel strategy information
-    - year_ranges: list of tuples containing the start and end years of the year ranges
+    Initializes a parallel strategy list, as well as define a method to query the list
+    The input data is reformated and removes keys certain keys.
+    Args:
+        input_dict: dictionary of parallel strategy information
+        year_ranges: list of tuples containing the start and end years of the year ranges
+        function: function to calculate the average speedup
     """
-    def __init__(self, input_dict: dict, year_ranges: list[tuple], function: str = 'mean'):
+    def __init__(self, input_dict: dict, year_ranges: list[tuple], function: str = 'geomean'):
 
         self.parallel_strategy_dict = OrderedDict()
         self.parallel_strategy_year_dict = OrderedDict({
@@ -61,11 +62,11 @@ class ParallelStrategyList(SubQueryList):
         self.compute_speedups(function)
 
     def query(self, query_year: int = None, query_parallel_strategy: str = None, query_phase: str = None):
-        """Queries the list of ParallelStrategy objects for an average speedup
-        \nInputs
-        - query_year: year to query
-        - query_parallel_strategy: parallel strategy to query (pipeline, tensor, data, automated search)
-        - query_phase: phase to query (inference or training)    
+        """
+        Queries the list of ParallelStrategy objects for an average speedup
+            query_year: year to query
+            query_parallel_strategy: parallel strategy to query (pipeline, tensor, data, automated search)
+            query_phase: phase to query (inference or training)    
         """
         first_parallel_strategy = next(iter(self.parallel_strategy_dict.values()))
         last_parallel_strategy = next(reversed(self.parallel_strategy_dict.values()))
@@ -95,9 +96,10 @@ class ParallelStrategyList(SubQueryList):
             return None
         
     def preprocess(self, input_dict: dict):
-        """Preprocesses the input dictionary remove invalid keys
-        \nInputs:
-        - input_dict: dictionary of parallel strategy information
+        """
+        Preprocesses the input dictionary remove invalid keys
+        Args:
+            input_dict: dictionary of parallel strategy information
         """
         prev_parallel_strategy = None
         for sub_dict in input_dict.values():
@@ -158,6 +160,8 @@ class ParallelStrategyList(SubQueryList):
     def compute_speedups(self, function: str = 'mean'):
         """
         Computes the average speedup for each parallel strategy and phase
+        Args:
+            function: function to calculate the average speedup
         """
         # Process parallel_strategy_dict
         for parallel_strategy_dict in self.parallel_strategy_dict.values():

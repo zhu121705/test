@@ -3,26 +3,27 @@ from query.query_interface import SubQueryList
 
 class HardwareComparison:
     """
-    This class constructs a hardware comparison object as well as defines getters
-    Inputs:
-    - year: year the hardware was released
-    - chip: name of the chip
-    - vendor: name of the vendor
-    - chip_type: type of chip (gpu, acc, wse)
-    - transistor_count: number of transistors on the chip
-    - area: area of the chip in mm^2
-    - core_count: number of cores on the chip
-    - percent_yield: percent yield of the chip
-    - tdp: thermal design power of the chip
-    - fp4: teraflops for 4-bit floating point
-    - fp8: teraflops for 8-bit floating point
-    - fp16_bf16: teraflops for 16-bit floating point (includes bfloat as well)
-    - fp32: teraflops for 32-bit floating point
-    - on_chip_mem: on-chip memory in GB
-    - on_chip_bandwidth: on-chip bandwidth in GB/s
-    - off_chip_mem: off-chip memory in GB
-    - off_chip_bandwidth: off-chip bandwidth in GB/s
-    - link: link to the source of the data
+    Initialize the hardware comparison object, which represents a specific chip's hardware configuration. Class also contains getters for the hardware comparison object
+
+        Args:
+            year: year the hardware was released
+            chip: name of the chip
+            vendor: name of the vendor
+            chip_type: type of chip (gpu, acc, wse)
+            transistor_count: number of transistors on the chip
+            area: area of the chip in mm^2
+            core_count: number of cores on the chip
+            percent_yield: percent yield of the chip
+            tdp: thermal design power of the chip
+            fp4: teraflops for 4-bit floating point
+            fp8: teraflops for 8-bit floating point
+            fp16_bf16: teraflops for 16-bit floating point (includes bfloat as well)
+            fp32: teraflops for 32-bit floating point
+            on_chip_mem: on-chip memory in GB
+            on_chip_bandwidth: on-chip bandwidth in GB/s
+            off_chip_mem: off-chip memory in GB
+            off_chip_bandwidth: off-chip bandwidth in GB/s
+            link: link to the source of the data
     """
     def __init__(self, year: int, chip: str, vendor: str, chip_type: str, transistor_count: int, area: int, core_count: int, percent_yield: int, tdp: int, fp4: float, fp8: float, fp16_bf16: float, fp32: float, on_chip_mem: int, on_chip_bandwidth: int, off_chip_mem: int, off_chip_bandwidth: int, link: str):
         self.year = year
@@ -67,15 +68,15 @@ class HardwareComparison:
 
 class HardwareComparisonList(SubQueryList):
     """
-    This class constructs a list of hardware comparison objects as well as defines a query function
-    Inputs:
-    - input_dict: dictionary containing hardware comparison information
+    Constructs a list of hardware comparison objects as well as defines a query function
+    Args:
+        input_dict: dictionary containing hardware comparison information
     """
     def __init__(self, input_dict: dict):
         self.hardware_comparison_list = []
         for sub_dict in input_dict.values():
             self.hardware_comparison_list.append(HardwareComparison(**sub_dict))
-        # minimum gpu years for each chip type option. If a query year is less than the minimum year, the query year will be set to the minimum year
+        # minimum and maximum gpu years for each chip type option. If a query year is less than the minimum year, the query year will be set to the minimum year, and visa versa for the maximum year
         self.min_year = {
             'gpu': min([item.get_year() for item in self.hardware_comparison_list if item.get_chip_type() == 'gpu']),
             'acc': min([item.get_year() for item in self.hardware_comparison_list if item.get_chip_type() == 'acc']),
@@ -86,15 +87,18 @@ class HardwareComparisonList(SubQueryList):
             'acc': max([item.get_year() for item in self.hardware_comparison_list if item.get_chip_type() == 'acc']),
             'wse': max([item.get_year() for item in self.hardware_comparison_list if item.get_chip_type() == 'wse'])
         }
-        
-    # Queries the hardware comparison list for the average tflops
-    # Inputs:
-    # - query_year: year to query
-    # - query_chip_type: chip type to query
-    # - query_numerical_format: numerical format to query
-    # Outputs:
-    # - average tflops
+
     def query(self, query_year: int, query_chip_type: str  = 'gpu', query_numerical_format = None, function = 'mean'):
+        """
+        Queries the hardware comparison list for the average tflops
+        Args:
+            query_year: year to query
+            query_chip_type: chip type to query ['gpu', 'acc', 'wse']
+            query_numerical_format: numerical format to query [4, 8, 16, 32]
+            function: function to apply to tflops list ['mean', 'median', 'geomean']
+        Returns:
+            average tflops
+        """
         tflops_list = []
         hardware_year = 0
         
