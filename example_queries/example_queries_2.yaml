@@ -1,0 +1,5 @@
+# you can also make seqarate query files, then add them through thier path
+
+queries:
+  query_1: 'example_queries/example_query_1.yaml'
+  query_2: 'example_queries/example_query_2.yaml'

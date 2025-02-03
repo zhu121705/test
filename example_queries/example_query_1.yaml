@@ -1,0 +1,15 @@
+# Example Query to the API. Year is the only required fields. The rest are optional to further specify the query.
+# Options for fields are listed in the 'configurations/example_configuration.yaml' file
+query:
+  year:
+    2018
+  numerical_format:
+    '16-4' # Not needed, numerical format speedups are grouped by year and this can be omitted
+  phase:
+    'training' # defaults to training where phase is necessary, but will make a difference if specified
+  parallel_strategy:
+    'pipeline' # defaults to pipeline, options are pipeline, tensor, and automated search
+  optimizer:
+    'adam' # defaults adam, rmsprop, sgd
+  chip_type:
+    'acc' # default gpu, options are acc, gpu, wse
